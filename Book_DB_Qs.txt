@@ -1,0 +1,70 @@
+Question 6) Book Database
+
+create database LAB;
+use LAB;
+
+create table Book(bookid int Primary key,title varchar(255),price int not null,pages int);
+
+create table Author(aid int primary key, au_name varchar(255), city varchar(255), no_pub varchar(255));
+
+create table Writtenby(bookid int not null,aid int not null, Foreign key(bookid) References Book(bookid),
+Foreign key(aid) References Author(aid));
+
+create table PublishedBy(bookid int not null, pid int not null, no_of_copies int, year int, 
+	foreign key(bookid) references Book(bookid), foreign key(pid) references Publisher(pid));
+    
+create table Supplier(sup_id int primary key, sup_name varchar(255), address varchar(255), city varchar(255));
+
+create table Supplies(bookid 
+int not null, sup_id int not null, sup_price int not null, foreign key(bookid) references Book(bookid),
+ foreign key(sup_id) references Supplier(sup_id));
+ 
+create table Publisher(pid int primary key, pb_name varchar(255), address varchar(255), phone varchar(20));
+
+
+
+ -- Q1) 
+ select a.au_name from Author a 
+ Inner Join Writtenby wb on a.aid = wb.aid
+ Inner Join PublishedBy pb on wb.bookid = pb.bookid
+ where pb.year = 2008;
+ 
+-- Q2) 
+select s.sup_name from Supplier s
+Inner Join Supplies sp on s.sup_id = sp.sup_id
+Inner Join Book b on sp.bookid = b.bookid
+where b.title = "Operating System";
+
+-- Q3)
+ select b.title from Book b
+ Inner Join PublishedBy pb on b.bookid = pb.bookid
+ Inner Join Publisher p on pb.pid = p.pid
+ where p.pb_name = "..."
+ order by b.title ASC;
+ 
+ -- Q4)
+ select p.pb_name AS Publisher_Name from Publisher p
+ Inner Join PublishedBy pb on p.pid = pb.pid
+ Inner Join Supplies s on s.bookid = pb.bookid
+ where s.sup_price < 500;
+ 
+ -- Q5)
+ select b.title from Book b
+ Inner Join Supplies sp on b.bookid = sp.bookid
+ Inner Join Suppliers s on s.sup_id = sp.sup_id
+ where s.city Not IN ("Sangli");
+ 
+ -- Q6)
+ select b.title from Book b 
+ Inner Join Supplies s on b.bookid = s.bookid
+ order by s.sup_price;
+ 
+ -- Q7)
+ select s.sup_name from Supplier s
+ Inner Join Supplies sp on s.sup_id = sp.sup_id
+ Inner Join Book b on sp.book = b.bookid
+ where b.title = "Networking";
+ 
+ -- Q8) 
+ select city,au_name from Author
+ group by city,au_name;

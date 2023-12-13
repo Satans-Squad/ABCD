@@ -1,0 +1,141 @@
+CREATE DATABASE mydb;
+USE mydb;
+
+CREATE TABLE Book (
+    accno INT PRIMARY KEY,
+    author VARCHAR(255),
+    title VARCHAR(255),
+    price DECIMAL(10, 2), 
+    pages INT
+);
+
+CREATE TABLE bookorder (
+    vendorno INT PRIMARY KEY,
+    accno INT,
+    orderno INT,
+    copies INT,
+    orderdate DATE,
+    FOREIGN KEY (accno) REFERENCES Book(accno)
+);
+
+CREATE TABLE vendor (
+    vendorno INT PRIMARY KEY,
+    vendorname VARCHAR(255)
+);
+
+CREATE TABLE members (
+    borrowno INT PRIMARY KEY,
+    name VARCHAR(255),
+    address VARCHAR(255)
+);
+
+CREATE TABLE bookissue (
+    issueid INT PRIMARY KEY AUTO_INCREMENT,
+    accno INT,
+    borrowno INT,
+    issueDate DATE,
+    FOREIGN KEY (accno) REFERENCES Book(accno),
+    FOREIGN KEY (borrowno) REFERENCES members(borrowno)
+);
+
+CREATE TABLE bookreturn (
+    returnid INT PRIMARY KEY AUTO_INCREMENT,
+    accno INT,
+    borrowno INT,
+    returnDate DATE,
+    FOREIGN KEY (accno) REFERENCES Book(accno),
+    FOREIGN KEY (borrowno) REFERENCES members(borrowno)
+);
+
+-- Insert data into Book table
+INSERT INTO Book (accno, author, title, price, pages)
+VALUES
+  (1, 'Author1', 'Title1', 29.99, 300),
+  (2, 'Author2', 'Title2', 19.95, 250),
+  (3, 'Author3', 'Title3', 49.99, 400);
+
+-- Insert data into bookorder table
+INSERT INTO bookorder (vendorno, accno, orderno, copies, orderdate)
+VALUES
+  (101, 1, 1001, 5, '2023-01-15'),
+  (102, 2, 1002, 10, '2023-02-20'),
+  (103, 3, 1003, 2, '2023-03-25');
+
+-- Insert data into vendor table
+INSERT INTO vendor (vendorno, vendorname)
+VALUES
+  (101, 'Vendor1'),
+  (102, 'Vendor2'),
+  (103, 'Vendor3');
+
+-- Insert data into members table
+INSERT INTO members (borrowno, name, address)
+VALUES
+  (1001, 'Member1', 'Address1'),
+  (1002, 'Member2', 'Address2'),
+  (1003, 'Member3', 'Address3');
+
+-- Insert data into bookissue table
+INSERT INTO bookissue (accno, borrowno, issueDate)
+VALUES
+  (1, 1001, '2023-01-20'),
+  (2, 1002, '2023-02-25'),
+  (3, 1005, '2023-03-30');
+
+-- Insert data into bookreturn table
+INSERT INTO bookreturn (accno, borrowno, returnDate)
+VALUES
+  (1, 1001, '2023-02-10'),
+  (2, 1002, '2023-03-15'),
+  (3, 1003, '2023-04-20');
+
+SELECT v.vendorname from vendor v join bookorder b on v.vendorno=b.vendorno order by b.copies desc;
+SELECT b.title from Book b order by b.price;
+SELECT m.name from bookissue b join members m on b.borrowno=m.borrowno where b.borrowno=m.borrowno;
+SELECT title
+FROM Book
+WHERE title LIKE '%The%' AND LENGTH(title) >= 4;
+
+DELIMITER //
+create trigger value_change
+before insert on Book
+for each row
+begin
+	if NEW.pages>300 then
+		SET NEW.price = 300;
+	end if;
+end;
+//
+DELIMITER ;
+
+INSERT INTO Book (accno, author, title, price, pages)
+VALUES
+  (5, 'Author5', 'Title5', 29.99, 350);
+  
+select * from Book;
+
+select distinct(count(b.accno)) from Book b;
+
+create view bookissueview as 
+select b.title as book_name, bi.issueDate from Book b join bookissue bi on bi.accno=b.accno;
+
+select * from bookissueview;
+
+select bi.accno from bookissued bi join bookreturn br on br.accno=bi.accno;
+
+INSERT INTO bookissue (accno, borrowno, issueDate)
+VALUES  (5, 1003, '2023-03-30');
+
+select distinct m.borrowno,m.name from members m join bookissue bi on bi.borrowno=m.borrowno
+left join bookreturn br on bi.borrowno=br.borrowno where br.borrowno is null;
+
+DELIMITER //
+CREATE TRIGGER book_issue_trigger
+AFTER INSERT ON bookissue
+FOR EACH ROW
+BEGIN
+    INSERT INTO summary_table (accno, issueDate)
+    VALUES (NEW.accno, NEW.issueDate);
+END;
+//
+DELIMITER ;

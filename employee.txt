@@ -1,0 +1,104 @@
+Employee (Empid, EmpName, Department, ContactNo, Emailld, EmpHeadId) 
+EmpDept (Deptld, DeptName, Dept_off, DeptHead) 
+EmpSalary(Empld, Salary, IsPermanent)
+ 1. Select the detail of the employee whose name start with P. 
+2. How many permanent candidate take salary more than 5000. 
+3. Select the detail of employee whose emailld is in gmail. 
+4. Select the details of the employee who work either for department E-104 or E-102. 
+5. What is the department name for DeptID E-102? 
+6. What is total salary that is paid to permanent employees? 
+7. Select the department name of the company which is assigned to the employee whose employee id is grater 103. List the count of department of employees in each project. 
+8. How many project started in year 2010.
+ 9. Select the name of the employee head who is permanent. 
+10. Select the name of the employee who is working under Abhishek. 
+
+
+-- Create tables
+CREATE TABLE Employee (
+    EmpId INT PRIMARY KEY,
+    EmpName VARCHAR(50),
+    Department VARCHAR(10),
+    ContactNo VARCHAR(15),
+    EmailId VARCHAR(50),
+    EmpHeadId INT
+);
+
+CREATE TABLE EmpDept (
+    DeptId VARCHAR(10) PRIMARY KEY,
+    DeptName VARCHAR(50),
+    DeptOff VARCHAR(50),
+    DeptHead VARCHAR(50)
+);
+
+CREATE TABLE EmpSalary (
+    EmpId INT PRIMARY KEY,
+    Salary INT,
+    IsPermanent BOOLEAN
+);
+
+-- Insert sample data
+-- Employee table
+INSERT INTO Employee VALUES
+(101, 'Pankaj', 'E-101', '9876543210', 'pankaj@gmail.com', 102),
+(102, 'Prakash', 'E-102', '9876543211', 'prakash@gmail.com', 103),
+(103, 'Abhishek', 'E-104', '9876543212', 'abhishek@gmail.com', NULL),
+(104, 'Parul', 'E-102', '9876543213', 'parul@gmail.com', 102),
+(105, 'Priya', 'E-103', '9876543214', 'priya@gmail.com', 103);
+
+-- EmpDept table
+INSERT INTO EmpDept VALUES
+('E-101', 'HR', 'Main Office', 'HR Head'),
+('E-102', 'IT', 'Tech Park', 'IT Head'),
+('E-103', 'Finance', 'Finance Building', 'Finance Head'),
+('E-104', 'Marketing', 'Marketing Center', 'Marketing Head');
+
+-- EmpSalary table
+INSERT INTO EmpSalary VALUES
+(101, 6000, true),
+(102, 7000, true),
+(103, 4500, false),
+(104, 8000, true),
+(105, 5500, false);
+
+-- Questions
+
+-- 1. Select the details of the employee whose name starts with P.
+SELECT * FROM Employee WHERE EmpName LIKE 'P%';
+
+-- 2. How many permanent candidates take a salary more than 5000.
+SELECT COUNT(*) FROM EmpSalary WHERE IsPermanent = true AND Salary > 5000;
+
+-- 3. Select the details of employees whose email is in Gmail.
+SELECT * FROM Employee WHERE EmailId LIKE '%@gmail.com%';
+
+-- 4. Select the details of employees who work either for department E-104 or E-102.
+SELECT * FROM Employee WHERE Department IN ('E-104', 'E-102');
+
+-- 5. What is the department name for DeptID E-102?
+SELECT DeptName FROM EmpDept WHERE DeptId = 'E-102';
+
+-- 6. What is the total salary paid to permanent employees?
+SELECT SUM(Salary) FROM EmpSalary WHERE IsPermanent = true;
+
+-- 7. Select the department name of the company assigned to the employee whose employee id is greater than 103.
+SELECT d.DeptName, COUNT(*) as EmployeeCount
+FROM Employee e
+JOIN EmpDept d ON e.Department = d.DeptId
+WHERE e.EmpId > 103
+GROUP BY d.DeptName;
+
+-- 8. How many projects started in the year 2010.
+-- (Note: Assuming the existence of a 'Projects' table with a 'StartDate' column)
+-- SELECT COUNT(*) FROM Projects WHERE YEAR(StartDate) = 2010;
+
+-- 9. Select the name of the employee head who is permanent.
+SELECT e.EmpName AS EmployeeHead
+FROM Employee e
+JOIN EmpSalary s ON e.EmpId = s.EmpId
+WHERE s.IsPermanent = true AND e.EmpHeadId IS NULL;
+
+-- 10. Select the name of the employee who is working under Abhishek.
+SELECT e.EmpName
+FROM Employee e
+JOIN Employee e_head ON e.EmpHeadId = e_head.EmpId
+WHERE e_head.EmpName = 'Abhishek';
