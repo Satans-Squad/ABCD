@@ -1,0 +1,10 @@
+docker run --name mysql-server -e MYSQL_ROOT_PASSWORD=example_pass -d mysql
+
+docker inspect mysql-server
+
+docker run -p 8080:80 -d -e PMA_ARBITRARY=1 phpmyadmin
+
+docker build -t php-apache-mysqli .
+
+docker run -d -p 80:80 -v ${PWD}:/var/www/html php-apache-mysqli
+docker run -d -p 80:80 -v "$(PWD)":/var/www/html php-apache-mysqli
