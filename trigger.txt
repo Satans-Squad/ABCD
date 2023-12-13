@@ -1,0 +1,26 @@
+create database account;
+use account;
+create table Account(acc_no int primary key,name varchar(20),balance int );
+insert into Account values (25859,"xyz",10000),(25860,"sss",12000),(25861,"lmn",1000);
+select * from Account;
+DELIMITER //
+create trigger t1 
+before update on Account 
+for each row 
+begin
+	if new.acc_no=25859 then
+		signal sqlstate "45000" set message_text = "update not allowed";
+	end if;
+end;
+DELIMITER //
+create trigger t2 
+before delete on Account 
+for each row 
+begin
+	if old.balance<2000 then
+		signal sqlstate "45001" set message_text = "delete not allowed";
+	end if;
+end;
+
+update Account set name="sss1" where acc_no=25860;
+delete from Account where acc_no=25861;
